@@ -1,28 +1,28 @@
-<div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.6;">
+<div style="font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; line-height: 1.55;">
 
-  <h1 align="center" style="margin-bottom: 0.2em;">ODE &amp; PDE Solvers in C# (2D Heat Equation + Inverted Pendulum SMC)</h1>
+  <h1 align="center" style="margin-bottom: 0.2em;">ODE &amp; PDE Solvers in C# (Heat Equation + Inverted Pendulum SMC)</h1>
 
   <p style="font-size: 0.98rem; max-width: 980px; margin: 0.2rem auto 0;">
-    A .NET repository focused on <strong>numerical simulation</strong> and <strong>visualization</strong> of
-    <strong>partial differential equations (PDEs)</strong> and <strong>ordinary differential equations (ODEs)</strong> using <strong>C#</strong>.
-    The project contains two complete end-to-end examples:
+    A .NET repository focused on <strong>numerical simulation</strong> and <strong>visualization</strong> of:
+    <strong>partial differential equations (PDEs)</strong> and <strong>ordinary differential equations (ODEs)</strong>.
+    The project includes two complete, end-to-end examples implemented in modern <strong>C#</strong>:
   </p>
 
-  <ul style="max-width: 980px; margin: 0.6rem auto 0.2rem; padding-left: 1.2rem;">
+  <ul style="max-width: 980px; margin: 0.55rem auto 0.2rem; padding-left: 1.2rem;">
     <li>
-      <strong>PDE:</strong> 2D heat-conduction (diffusion) equation solved with an explicit finite-difference method (FTCS),
-      producing <strong>high-resolution heatmap snapshots</strong>, summary plots, and a CSV log.
+      <strong>PDE:</strong> 2D heat-conduction equation solved using an explicit finite-difference method (FTCS),
+      generating <strong>heatmap snapshots</strong>, summary plots, and a CSV log.
     </li>
     <li>
-      <strong>ODE:</strong> a nonlinear cart–pole (inverted pendulum) system stabilized using
-      <strong>Sliding Mode Control (SMC)</strong> with injected disturbances, producing
-      <strong>high-FPS animation frames</strong>, an optional MP4 video via <strong>FFmpeg</strong>, plots, and a CSV log.
+      <strong>ODE:</strong> a nonlinear cart–pole (inverted pendulum) stabilized using
+      <strong>Sliding Mode Control (SMC)</strong>, generating <strong>high-FPS frames</strong>, plots, a CSV log,
+      and optional <strong>MP4 encoding</strong> using FFmpeg.
     </li>
   </ul>
 
-  <p align="center" style="font-size: 1rem; color: #666; margin: 0.45rem auto 0;">
-    Platform target: <strong>.NET 8</strong> • IDE: <strong>Visual Studio 2022</strong> • Plotting: <strong>ScottPlot (v5)</strong> •
-    Rendering: <strong>System.Drawing</strong> • Optional video encoding: <strong>FFmpeg</strong>
+  <p align="center" style="font-size: 1rem; color: #666; margin: 0.35rem auto 0;">
+    Tooling: <strong>.NET 8</strong> • IDE: <strong>Visual Studio 2022</strong> • Plots: <strong>ScottPlot 5</strong> •
+    Rendering (frames): <strong>System.Drawing / WinForms</strong> • Optional video encoding: <strong>FFmpeg</strong>
   </p>
 
 </div>
@@ -30,7 +30,7 @@
 <hr />
 
 <!-- ========================================================= -->
-<!-- Table of Contents                                        -->
+<!-- Table of Contents                                         -->
 <!-- ========================================================= -->
 
 <ul style="list-style: none; padding-left: 0; font-size: 0.97rem;">
@@ -42,8 +42,9 @@
   <li> <a href="#numerical-methods-used-in-this-repo">Numerical methods used in this repo</a></li>
   <li> <a href="#plots-and-animations-scottplot-systemdrawing-ffmpeg">Plots and animations (ScottPlot, System.Drawing, FFmpeg)</a></li>
   <li> <a href="#dependencies-and-installation">Dependencies and installation</a></li>
+  <li> <a href="#building-the-solution">Building the solution</a></li>
+  <li> <a href="#running-and-generating-results">Running and generating results</a></li>
   <li> <a href="#repository-file-guide">Repository file guide (full explanation)</a></li>
-  <li> <a href="#running-the-projects-and-generating-results">Running the projects and generating results</a></li>
   <li> <a href="#operating-system-guides-windows-macos-linux">Operating system guides (Windows / macOS / Linux)</a></li>
   <li> <a href="#troubleshooting">Troubleshooting</a></li>
   <li> <a href="#implementation-tutorial-video">Implementation tutorial video</a></li>
@@ -57,21 +58,20 @@
 
 This repository is designed as a practical reference for implementing numerical solvers in modern C# (.NET 8):
 
-- A <strong>PDE workflow</strong> that starts from a physical model (heat conduction), discretizes it, runs a time-marching solver,
-  and produces professional plots and image snapshots.
-- An <strong>ODE + control workflow</strong> that implements a nonlinear plant (cart–pole), injects disturbances, runs a robust controller
-  (Sliding Mode Control), generates simulation plots, and produces an animation/video.
+- A <strong>PDE workflow</strong> that starts from a physical diffusion model (heat conduction), discretizes it on a grid,
+  runs an explicit time-marching solver, and produces plots and heatmap snapshots suitable for reports.
+- An <strong>ODE + control workflow</strong> that implements a nonlinear plant (cart–pole), injects disturbances, applies a robust controller
+  (Sliding Mode Control), and produces both engineering plots and a high-FPS animation.
 
-The goal is not only to “get results,” but also to show common engineering practices:
+Engineering practices emphasized throughout the code:
 
-- stable time stepping (explicit stability constraints),
-- reproducible logging to CSV,
-- high-resolution figure export (including 300 DPI metadata),
-- animation frames for debugging and communication,
-- optional video encoding through FFmpeg,
-- a clean Visual Studio solution structure (one solution, multiple projects).
+- explicit stability constraints for diffusion PDEs,
+- deterministic integration and reproducible outputs,
+- clean CSV logging for post-processing,
+- high-quality PNG export (including 300 DPI metadata),
+- optional MP4 encoding using an external encoder (FFmpeg).
 
-### Quick map of the two projects
+### Quick map of the two executables
 
 - <code>Heat2D</code> → solves the 2D heat equation and writes results into <code>output/heat2d/</code>
 - <code>PendulumSlidingMode</code> → simulates a cart–pole and writes results into <code>output/pendulum_sliding_mode/</code>
@@ -92,16 +92,16 @@ $$
 
 where:
 
-- $\mathbf{x}(t)$ is the state (e.g., cart position, pole angle),
+- $\mathbf{x}(t)$ is the system state (e.g., cart position and pole angle),
 - $\mathbf{u}(t)$ is an input (e.g., a control force),
-- $\mathbf{f}(\cdot)$ describes the nonlinear dynamics.
+- $\mathbf{f}(\cdot)$ defines the system dynamics.
 
-In this repository, the inverted pendulum example is a nonlinear ODE system integrated in time using a 4th-order Runge–Kutta (RK4) scheme with sub-stepping per rendered frame.
+In this repository, the inverted pendulum example is a nonlinear ODE system integrated using an RK4 scheme with sub-stepping.
 
 ### Partial Differential Equations (PDEs)
 
-A PDE involves partial derivatives with respect to two or more independent variables (e.g., time and space). A canonical example is the
-heat equation (diffusion equation):
+A PDE involves partial derivatives with respect to two or more independent variables (e.g., time and space).
+A canonical example is the heat (diffusion) equation:
 
 $$
 \frac{\partial T}{\partial t} = \alpha \left( \frac{\partial^2 T}{\partial x^2} + \frac{\partial^2 T}{\partial y^2} \right),
@@ -114,7 +114,7 @@ where:
 - $(x,y)$ are spatial coordinates,
 - $t$ is time.
 
-In this repository, the heat equation is discretized in space using finite differences and integrated forward in time using an explicit FTCS method.
+In this repository, the heat equation is discretized in space using finite differences and marched forward in time using an explicit FTCS update.
 
 ---
 
@@ -135,9 +135,9 @@ Interpretation:
 - conduction in a 2D plate,
 - no internal heat sources,
 - constant isotropic diffusivity $\alpha$,
-- fixed temperature boundaries (Dirichlet BCs).
+- fixed-temperature boundaries (Dirichlet boundary conditions).
 
-Boundary conditions:
+The implemented boundary conditions are:
 
 - left boundary held at $T=100$,
 - right/top/bottom held at $T=0$,
@@ -146,13 +146,7 @@ which produces a diffusion front moving from the left edge into the interior.
 
 ### Discretization summary (what the code computes)
 
-The solver uses:
-
-- uniform grid in $x$ and $y$,
-- second-order central differences for $\partial^2 T/\partial x^2$ and $\partial^2 T/\partial y^2$,
-- explicit time stepping (Forward Euler in time).
-
-At interior grid nodes $(i,j)$:
+For interior grid nodes $(i,j)$, the FTCS update is:
 
 $$
 T^{n+1}_{i,j} = T^{n}_{i,j} + \alpha\,\Delta t\left(
@@ -162,30 +156,31 @@ T^{n+1}_{i,j} = T^{n}_{i,j} + \alpha\,\Delta t\left(
 \right).
 $$
 
+Implementation details:
+
+- the 2D grid is stored as a flattened 1D array for cache efficiency,
+- <code>Idx(i, j, nx)</code> converts 2D indices to a 1D index,
+- boundary nodes are overwritten every step to enforce Dirichlet conditions exactly,
+- snapshots are throttled (not saved every step) to avoid generating thousands of images.
+
 ### Stability constraint (explicit diffusion)
 
-For the 2D explicit diffusion scheme, a commonly used sufficient stability constraint is:
+A common sufficient stability constraint for the 2D explicit diffusion scheme is:
 
 $$
 \Delta t \le \frac{1}{2\alpha \left(\frac{1}{\Delta x^2} + \frac{1}{\Delta y^2}\right)}.
 $$
 
-The code computes <code>dtStable</code> and uses a conservative factor (<code>0.80</code>) to avoid running near the limit.
+The code computes this limit and uses a conservative factor (<code>0.80</code>) to avoid running near the edge of stability.
 
-### Output artifacts
+### Outputs produced
 
-When you run <code>Heat2D</code> you will find:
+Running <code>Heat2D</code> creates:
 
 - heatmap snapshots: <code>output/heat2d/heat_t*.png</code>
 - final centerline profile: <code>output/heat2d/centerline_final.png</code>
 - center temperature vs time: <code>output/heat2d/center_point_vs_time.png</code>
 - CSV log: <code>output/heat2d/heat2d_log.csv</code>
-
-This combination is typical for PDE workflows:
-
-- images for qualitative verification,
-- plots for engineering interpretation,
-- CSV for reproducibility and post-processing in Python/Matlab/Excel.
 
 ---
 
@@ -197,64 +192,65 @@ The second example (<code>ODE_PDE_Csharp/PendulumSlidingMode/Program.cs</code>) 
 
 ### State variables and conventions
 
-The state vector is:
+The state is:
 
 $$
-\mathbf{x} =
-\begin{bmatrix}
-x & \dot{x} & \theta & \dot{\theta}
-\end{bmatrix}^T
+\mathbf{x} = \begin{bmatrix} x & \dot{x} & \theta & \dot{\theta} \end{bmatrix}^T
 $$
 
-- $x$ is cart position (m),
-- $\theta$ is pole angle (rad) with $\theta=0$ upright,
-- angle wrapping keeps $\theta \in [-\pi,\pi]$ to avoid numeric drift.
+- $x$ is the cart position (m),
+- $\theta$ is the pole angle (rad) where $\theta=0$ is upright,
+- the rendering convention is: $\theta &gt; 0$ visually leans the pole to the right.
+
+Two practical helper operations are used:
+
+- angle wrapping into $[-\pi,\pi]$ to avoid numeric drift,
+- clamping/saturation for actuator limits and SMC boundary-layer logic.
 
 ### Disturbances (exactly two)
 
-Two external disturbance pulses are injected as an external torque about the pole pivot:
+Two external torque pulses are injected about the pole pivot:
 
-- pulse 1: starts at $t=0.5\,s$ (positive torque; “push right”)
-- pulse 2: starts at $t=5.0\,s$ (negative torque; “push left”)
+- pulse 1: starts at $t=0.5\,s$ (positive torque),
+- pulse 2: starts at $t=5.0\,s$ (negative torque),
 
-Each pulse lasts 0.5 seconds and uses a smooth half-sine profile:
+each using a smooth half-sine profile over a duration of $0.5\,s$.
+The disturbance arrow is shown for <strong>0.5 seconds only</strong> after each pulse starts and is drawn with <strong>constant length</strong>.
+
+Disturbance model:
 
 $$
 \tau_{ext}(t) =
 \begin{cases}
-+\tau_{amp}\sin\left(\pi\frac{t-t_1}{d}\right) & t\in[t_1,t_1+d] \\
--\tau_{amp}\sin\left(\pi\frac{t-t_2}{d}\right) & t\in[t_2,t_2+d] \\
-0 & \text{otherwise}
++\tau_{amp}\sin\left(\pi\frac{t-t_1}{d}\right) &amp; t\in[t_1,t_1+d] \\
+-\tau_{amp}\sin\left(\pi\frac{t-t_2}{d}\right) &amp; t\in[t_2,t_2+d] \\
+0 &amp; \text{otherwise}
 \end{cases}
 $$
 
-where $d=0.5\,s$.
-
-For visualization and logging, the code also reports an “equivalent bob force”:
+and the “equivalent bob force” used for arrow direction is:
 
 $$
 F_{eq}(t) = \frac{\tau_{ext}(t)}{L}.
 $$
 
-An on-screen arrow is drawn for 0.5 seconds after each disturbance start time. The arrow length is constant (only direction changes) to provide a clear direction indicator.
-
 ### Simulation and rendering pipeline
 
-This example is intentionally end-to-end:
+The program is intentionally end-to-end:
 
-- integrate the nonlinear dynamics (RK4),
+- integrate the nonlinear dynamics using RK4,
 - render each frame using the current integrated state (System.Drawing),
-- save frames as PNG images,
-- optionally encode MP4 using FFmpeg,
-- generate plots (ScottPlot),
-- save a CSV log.
+- save frames to disk,
+- optionally encode a video using FFmpeg,
+- generate plots using ScottPlot,
+- write a CSV log for offline analysis.
 
 Outputs include:
 
-- <code>output/pendulum_sliding_mode/frames/frame_000000.png</code> ... <code>frame_005999.png</code>
-- <code>output/pendulum_sliding_mode/pendulum_smc_10s_6000f.mp4</code> (if FFmpeg is available)
-- plots: <code>cart_position.png</code>, <code>pole_angle.png</code>, <code>control_force.png</code>, etc.
-- <code>output/pendulum_sliding_mode/cartpole_log.csv</code>
+- frames: <code>output/pendulum_sliding_mode/frames/frame_000000.png</code> … <code>frame_005999.png</code>
+- plots: <code>output/pendulum_sliding_mode/*.png</code>
+- CSV: <code>output/pendulum_sliding_mode/cartpole_log.csv</code>
+- MP4: <code>output/pendulum_sliding_mode/pendulum_smc_10s_6000f.mp4</code> (if FFmpeg is installed and reachable via PATH)
 
 ---
 
@@ -262,19 +258,19 @@ Outputs include:
 
 ## Sliding Mode Control (SMC) theory
 
-Sliding Mode Control is a robust nonlinear control method that enforces a chosen “sliding manifold” (sliding surface) in the state space, even in the presence of disturbances and model uncertainty.
+Sliding Mode Control is a robust nonlinear control method designed to drive the system state to a chosen manifold (the “sliding surface”) and maintain it there even under disturbances and certain modeling uncertainties.
 
 ### 1) Sliding surface design
 
-For a general second-order system, a common sliding surface is:
+For a general second-order system, a classical sliding surface is:
 
 $$
 s = \dot{e} + \lambda e,
 $$
 
-where $e$ is the tracking error. Enforcing $s \to 0$ yields stable error dynamics.
+where $e$ is a tracking error and $\lambda &gt; 0$. Enforcing $s \to 0$ yields stable error dynamics.
 
-In this repository, the “error” is the pendulum’s deviation from upright ($\theta$), plus a cart stabilization term. The implemented sliding surface is:
+In this repository, the surface couples pendulum stabilization with cart motion:
 
 $$
 s(\mathbf{x}) = \dot{\theta} + \lambda_{\theta}\,\theta + \alpha\left(\dot{x} + \lambda_x\,x\right).
@@ -282,94 +278,77 @@ $$
 
 Interpretation:
 
-- $\lambda_{\theta}$ penalizes angle error,
-- $\alpha$ couples cart motion into the balancing objective (cart acceleration is how the pendulum is “caught”),
-- $\lambda_x$ adds a soft tendency toward cart centering.
+- $\lambda_{\theta}$ sets how aggressively the controller drives the pole upright,
+- $\alpha$ couples cart motion (needed to “catch” the pole) into the surface,
+- $\lambda_x$ introduces a cart-centering component.
 
-### 2) Reaching condition (Lyapunov argument)
+### 2) Reaching condition (Lyapunov intuition)
 
-Define a Lyapunov candidate:
-
-$$
-V(s) = \frac{1}{2}s^2.
-$$
-
-A sufficient reaching condition is:
+A typical sufficient condition to guarantee reaching and maintaining the sliding manifold is:
 
 $$
-\dot{V} = s\dot{s} \le -\eta|s|,\quad \eta>0,
+\frac{d}{dt}\left(\frac{1}{2}s^2\right) = s\dot{s} \le -\eta |s|,
 $$
 
-which implies that $|s|$ decreases and reaches zero in finite time.
+where $\eta &gt; 0$. This ensures $|s|$ decreases and reaches zero in finite time.
 
-A classical SMC choice is:
+A common target dynamic is:
 
 $$
-\dot{s} = -k\,\mathrm{sign}(s),\quad k>0.
+\dot{s} = -k\,\mathrm{sign}(s), \quad k &gt; 0.
 $$
-
-This produces strong corrective action and robust disturbance rejection (particularly for “matched” disturbances).
 
 ### 3) Boundary layer to reduce chattering
 
-The ideal sign function can cause chattering (high-frequency switching). A common mitigation is to replace $\mathrm{sign}(\cdot)$ with a continuous saturation function:
+The discontinuous sign function can cause chattering. A standard mitigation is to replace it with a continuous saturation function:
 
 $$
-\mathrm{sat}(z)=
+\mathrm{sat}(z) =
 \begin{cases}
--1 & z<-1 \\
-z  & |z|\le 1 \\
-+1 & z>1
+-1 &amp; z &lt; -1 \\
+z  &amp; |z| \le 1 \\
++1 &amp; z &gt; 1
 \end{cases}
 $$
 
-and enforce:
+and use:
 
 $$
 \dot{s} = -k\,\mathrm{sat}\left(\frac{s}{\phi}\right),
 $$
 
-where $\phi>0$ defines the boundary-layer thickness. In this repository:
+where $\phi &gt; 0$ defines the boundary-layer thickness. This repository implements this directly using:
 
-- <code>K</code> corresponds to $k$,
-- <code>Phi</code> corresponds to $\phi$,
-- the helper <code>Sat()</code> implements the saturation map.
+- <code>k</code> (gain)
+- <code>phi</code> (boundary layer width)
 
-### 4) How the code computes the control input
+### 4) Control computation used in the code
 
-For the cart–pole, an explicit closed-form mapping $u \mapsto \dot{s}$ can be inconvenient to derive and maintain. The code therefore uses a pragmatic numeric linearization:
+Because the plant is nonlinear, the program does not rely on a closed-form affine relationship between the cart force $u$ and $\dot{s}$.
+Instead, it uses a practical numerical linearization around the current state:
 
-1. Compute the desired sliding surface derivative:  
-   $$\dot{s}_{des} = -k\,\mathrm{sat}\left(\frac{s}{\phi}\right).$$
-2. Approximate $\dot{s}(u)$ locally as an affine function:  
-   $$\dot{s}(u)\approx a u + b.$$
-3. Estimate $a$ and $b$ numerically using two evaluations of the nominal dynamics (ignoring the disturbance torque inside the control law):  
-   $$a \approx \dot{s}(1)-\dot{s}(0), \qquad b \approx \dot{s}(0).$$
-4. Solve for the control:  
-   $$u_{smc} = \frac{\dot{s}_{des}-b}{a}.$$
-5. Apply saturation:  
-   $$u = \mathrm{clamp}(u_{smc}+u_{hold}, -u_{max}, u_{max}).$$
+1. Define the desired sliding surface derivative:  
+   $ \dot{s}_{des} = -k\,\mathrm{sat}\left(\frac{s}{\phi}\right) $.
+2. Approximate $\dot{s}(u)$ locally as $\dot{s}(u) \approx a u + b$ by evaluating $\dot{s}$ at two nearby inputs.
+3. Solve:
+   $ u_{smc} = \frac{\dot{s}_{des} - b}{a} $.
+4. Add a gated cart-centering term and clamp to actuator limits.
 
-This approach is frequently used in practice when you want an SMC-like behavior without hard-coding a brittle symbolic derivation.
+### 5) Gated cart-centering term
 
-### 5) Cart-centering term with gating
-
-To avoid cart drift, a centering term is added:
+To prevent long-term drift, a cart-centering PD term is used, but it is “gated” so it does not fight the stabilization maneuver:
 
 $$
 u_{hold} = g(\theta)\left(-k_p x - k_d \dot{x}\right),
 $$
 
-with a gate:
+where:
 
 $$
-g(\theta)=\mathrm{clamp}\left(1-\frac{|\theta|}{\theta_{gate}}, 0, 1\right).
+g(\theta) = \mathrm{clamp}\left(1 - \frac{|\theta|}{\theta_{gate}}, 0, 1\right).
 $$
 
-This means:
-
-- when $|\theta|$ is large, $g(\theta)\approx 0$: prioritize catching/balancing,
-- near upright, $g(\theta)\approx 1$: softly return the cart toward $x=0$.
+Result: the controller prioritizes catching the pole, then recenters the cart when the system is close to upright.
 
 ---
 
@@ -379,31 +358,31 @@ This means:
 
 ### PDE solver: explicit finite differences (FTCS)
 
-The heat solver is a textbook example of an explicit diffusion integrator:
+The heat solver uses:
 
-- Space: central differences (2nd order)
-- Time: forward Euler (1st order)
+- second-order central differences for spatial second derivatives,
+- forward Euler in time.
 
 Strengths:
 
-- straightforward implementation,
-- inexpensive per time step,
-- natural baseline for later improvements.
+- straightforward and fast per-step,
+- easy to extend and optimize.
 
-Limitations:
+Limitation:
 
-- stability constraint can force small $\Delta t$ for fine grids.
+- explicit stability constraints can force small time steps as the grid is refined.
 
-A typical extension is an implicit method (e.g., Crank–Nicolson or ADI) to relax/remove the explicit stability constraint.
+A common next step is an implicit method (Crank–Nicolson, ADI) to relax stability constraints.
 
 ### ODE solver: RK4 with sub-stepping
 
-The cart–pole uses classical Runge–Kutta 4th order (RK4). The simulation produces 6000 frames in 10 seconds (600 FPS), so the code uses substeps per frame:
+The cart–pole uses classical RK4.
+Because the animation is rendered at high FPS, the code uses multiple physics substeps per frame:
 
-- frame time step: $\Delta t_{frame} = T_{video}/N_{frames}$
-- physics step: $\Delta t_{physics} = \Delta t_{frame}/N_{substeps}$
+- $\Delta t_{frame} = T_{video}/N_{frames}$
+- $\Delta t_{physics} = \Delta t_{frame}/N_{substeps}$
 
-Sub-stepping improves stability and ensures the rendered frames correspond to physically integrated states.
+This yields stable dynamics integration while maintaining deterministic frame output.
 
 ---
 
@@ -415,34 +394,30 @@ Sub-stepping improves stability and ensures the rendered frames correspond to ph
 
 This repository uses <a href="https://scottplot.net/" target="_blank">ScottPlot</a> (v5) for:
 
-- heatmaps (temperature fields),
-- time-history plots (signals vs time),
-- final cross-sections (centerline temperature).
+- line plots (time series),
+- heatmaps (temperature field snapshots),
+- saving PNG images in high resolution.
 
-Export behavior:
+The programs export large pixel dimensions and embed 300 DPI metadata in the PNG files for report-quality figures.
 
-- images are saved at high pixel resolution (e.g., 2400×1800 or 2600×1600),
-- the PNG is rewritten to embed <strong>300 DPI metadata</strong> safely (no cropping) for print-quality export.
+### System.Drawing / WinForms (animation frames)
 
-### System.Drawing (frame rendering)
+The pendulum example renders frames using:
 
-The inverted pendulum animation frames are drawn using:
+- <code>System.Drawing.Bitmap</code> as the offscreen framebuffer,
+- <code>Graphics</code> drawing primitives (lines, ellipses),
+- optional <code>--preview</code> using WinForms (<code>Form</code> + <code>PictureBox</code>).
 
-- <code>Bitmap</code> as an offscreen canvas,
-- <code>Graphics</code> drawing primitives (lines, filled shapes),
-- anti-aliasing and high-quality interpolation settings.
+### FFmpeg (optional) for MP4 encoding
 
-Frames are saved as PNGs into:
+If FFmpeg is installed and available on PATH, the pendulum program attempts to encode an MP4 automatically.
+If not, you can always encode manually:
 
-- <code>output/pendulum_sliding_mode/frames/</code>
-
-### FFmpeg (optional MP4 encoding)
-
-If <code>ffmpeg</code> is available on your PATH, the program automatically encodes:
-
-- <code>pendulum_smc_10s_6000f.mp4</code>
-
-The FFmpeg invocation is designed to avoid “hung encoding” scenarios by <strong>not</strong> redirecting stdout/stderr and by using a fast encoder preset.
+```bash
+ffmpeg -y -framerate 600 -i output/pendulum_sliding_mode/frames/frame_%06d.png \
+  -c:v libx264 -pix_fmt yuv420p -crf 18 -preset veryfast \
+  output/pendulum_sliding_mode/pendulum_smc_10s_6000f.mp4
+```
 
 ---
 
@@ -450,27 +425,77 @@ The FFmpeg invocation is designed to avoid “hung encoding” scenarios by <str
 
 ## Dependencies and installation
 
-### Required software
+### Required (Windows-first configuration)
 
-- <strong>.NET SDK 8</strong> (for build/run with <code>dotnet</code>)
-- <strong>Visual Studio 2022</strong> (recommended on Windows)
-- NuGet packages:
-  - <strong>ScottPlot</strong> (v5)
-  - <strong>System.Drawing.Common</strong> (for Bitmap/Graphics types used in rendering and DPI metadata)
+- Visual Studio 2022 (recommended)
+- .NET SDK 8
+- NuGet packages (restored automatically by Visual Studio / dotnet):
+  - <code>ScottPlot</code> (plots + heatmaps)
+  - <code>System.Drawing.Common</code> (frame rendering and PNG metadata on Windows)
+- Optional: FFmpeg for MP4 encoding
 
-### Optional (recommended)
+### Why the repository targets <code>net8.0-windows</code>
 
-- <strong>FFmpeg</strong> for MP4 encoding
-  - without FFmpeg, you still get PNG frames and can encode manually.
+The pendulum renderer uses WinForms types and System.Drawing APIs intended for Windows.
+Therefore the current projects target:
 
-### NuGet packages used
+- <code>TargetFramework</code>: <code>net8.0-windows</code>
+- <code>&lt;UseWindowsForms&gt;true&lt;/UseWindowsForms&gt;</code>
 
-Both projects use the same package set (as configured in the <code>.csproj</code> files):
+A cross-platform port is feasible (see OS guides), but the current configuration prioritizes Visual Studio 2022 on Windows.
 
-<ul>
-  <li><strong>ScottPlot</strong> (<code>Version=5.*</code>)</li>
-  <li><strong>System.Drawing.Common</strong> (<code>Version=8.0.0</code>)</li>
-</ul>
+---
+
+<a id="building-the-solution"></a>
+
+## Building the solution
+
+### Visual Studio (recommended)
+
+- Open <code>ODE_PDE_Csharp.sln</code>
+- Set configuration to <strong>Release</strong>
+- Build: <strong>Build → Build Solution</strong>
+
+### .NET CLI
+
+From the repository root:
+
+```bash
+dotnet restore
+dotnet build -c Release
+```
+
+---
+
+<a id="running-and-generating-results"></a>
+
+## Running and generating results
+
+### Run Heat2D
+
+```bash
+dotnet run --project ODE_PDE_Csharp/Heat2D -c Release
+```
+
+Outputs:
+
+- <code>output/heat2d/</code>
+
+### Run PendulumSlidingMode
+
+```bash
+dotnet run --project ODE_PDE_Csharp/PendulumSlidingMode -c Release
+```
+
+Optional preview window:
+
+```bash
+dotnet run --project ODE_PDE_Csharp/PendulumSlidingMode -c Release -- --preview
+```
+
+Outputs:
+
+- <code>output/pendulum_sliding_mode/</code>
 
 ---
 
@@ -478,126 +503,78 @@ Both projects use the same package set (as configured in the <code>.csproj</code
 
 ## Repository file guide (full explanation)
 
-This section explains every important file and its role.
+This section explains each important file in the repository and its role.
 
 ### <code>ODE_PDE_Csharp/Heat2D/Program.cs</code>
 
-A self-contained PDE pipeline:
+Responsibilities:
 
 - defines the physical parameters and grid (<code>nx</code>, <code>ny</code>, <code>dx</code>, <code>dy</code>),
-- computes an explicit stability time step (<code>dtStable</code>) and chooses a conservative <code>dt</code>,
-- stores the 2D temperature field in a flattened 1D array for cache efficiency,
-- updates interior nodes using the FTCS scheme,
-- enforces Dirichlet boundary conditions on every time step,
-- logs temperature at the grid center over time,
-- periodically saves heatmap snapshots,
-- produces summary plots:
-  - final centerline temperature profile,
-  - center temperature versus time,
-- saves a CSV log (<code>heat2d_log.csv</code>).
+- computes a stable explicit time step and chooses a conservative <code>dt</code>,
+- performs the FTCS update for interior nodes,
+- enforces fixed-temperature boundaries at every step,
+- logs center temperature over time,
+- saves:
+  - periodic heatmap snapshots (<code>heat_t*.png</code>),
+  - a final centerline plot,
+  - a center temperature vs time plot,
+  - a CSV log.
 
-Plot/export details:
+Export quality notes:
 
-- <code>SavePlotPng300Dpi()</code> exports at high resolution then rewrites PNG metadata to embed 300 DPI, using a pixel-exact clone to avoid DPI cropping artifacts.
+- plots are saved at high pixel resolution,
+- PNGs are rewritten to embed 300 DPI metadata without resampling (avoids cropping).
 
 ### <code>ODE_PDE_Csharp/Heat2D/Heat2D.csproj</code>
 
-Project configuration for the heat solver:
+Defines project settings and dependencies:
 
-- targets <code>net8.0-windows</code>,
-- enables WinForms types (<code>&lt;UseWindowsForms&gt;true&lt;/UseWindowsForms&gt;</code>) for consistent System.Drawing behavior in this repository,
-- references:
-  - ScottPlot v5
-  - System.Drawing.Common
+- <code>TargetFramework</code>: <code>net8.0-windows</code>
+- <code>UseWindowsForms</code>: enabled (safe for System.Drawing usage on Windows)
+- NuGet references:
+  - <code>ScottPlot</code>
+  - <code>System.Drawing.Common</code>
 
 ### <code>ODE_PDE_Csharp/PendulumSlidingMode/Program.cs</code>
 
-A complete ODE + control + rendering pipeline:
+This file contains the full ODE + control + rendering pipeline:
 
-- defines a physically motivated cart–pole model including:
-  - rod+bob mass distribution,
-  - center-of-mass location,
-  - pivot inertia and derived inertia factor,
-  - cart and pole damping,
-- defines the control strategy:
-  - sliding surface <code>s</code>,
-  - boundary-layer saturation,
-  - numeric linearization to compute <code>u</code>,
-  - actuator saturation,
-  - gated cart-centering,
-- defines disturbances:
-  - two half-sine torque pulses,
-  - 0.5 second arrow display window,
-- integrates dynamics using RK4 with substeps per frame,
-- renders frames into a <code>Bitmap</code> using <code>Graphics</code>,
-- saves frames and logs signals,
-- saves plots and CSV,
-- optionally encodes MP4 via FFmpeg (when available).
+1) <strong>Model and parameters</strong>
+- cart mass, pole geometry, rod+bob inertia modeling, damping terms
+
+2) <strong>Disturbance injection</strong>
+- two half-sine torque pulses at fixed times (0.5s and 5.0s)
+- constant-length arrow shown for 0.5s after each disturbance start
+
+3) <strong>Controller</strong>
+- sliding surface definition
+- boundary-layer saturation
+- gated cart-centering term
+- actuator saturation
+
+4) <strong>Integration</strong>
+- RK4 dynamics integration
+- multiple substeps per frame
+
+5) <strong>Rendering</strong>
+- offscreen <code>Bitmap</code> rendering with high-quality settings
+- PNG export for each frame
+- optional preview with WinForms
+
+6) <strong>Outputs</strong>
+- plots (ScottPlot)
+- CSV log
+- optional MP4 encoding via FFmpeg
 
 ### <code>ODE_PDE_Csharp/PendulumSlidingMode/PendulumSlidingMode.csproj</code>
 
-Project configuration for the cart–pole simulation:
+Defines:
 
-- targets <code>net8.0-windows</code>,
-- enables WinForms types for optional preview (<code>--preview</code>),
-- references:
-  - ScottPlot v5
-  - System.Drawing.Common
-
----
-
-<a id="running-the-projects-and-generating-results"></a>
-
-## Running the projects and generating results
-
-### Important note: where the <code>output/</code> folder is created
-
-Both programs write to relative paths like <code>output/heat2d</code>. The exact location depends on the <strong>working directory</strong>:
-
-- When you run from Visual Studio Debug, the default working directory is often:
-  <code>.../bin/Debug/net8.0-windows/</code>
-  so the output folder may appear under that directory.
-- If you want <code>output/</code> at the repository root, set the project working directory to the solution folder (steps shown in the Windows guide).
-
-### Run Heat2D
-
-- Visual Studio: select <code>Heat2D</code> as Startup Project → Run
-- CLI:
-  <pre><code>dotnet run --project ODE_PDE_Csharp/Heat2D -c Release</code></pre>
-
-Expected outputs:
-
-- <code>output/heat2d/heat_t*.png</code>
-- <code>output/heat2d/centerline_final.png</code>
-- <code>output/heat2d/center_point_vs_time.png</code>
-- <code>output/heat2d/heat2d_log.csv</code>
-
-### Run PendulumSlidingMode
-
-- Visual Studio: select <code>PendulumSlidingMode</code> as Startup Project → Run
-- CLI:
-  <pre><code>dotnet run --project ODE_PDE_Csharp/PendulumSlidingMode -c Release</code></pre>
-
-Optional live preview window:
-
-<pre><code>dotnet run --project ODE_PDE_Csharp/PendulumSlidingMode -c Release -- --preview</code></pre>
-
-Expected outputs:
-
-- <code>output/pendulum_sliding_mode/frames/frame_*.png</code>
-- plots in <code>output/pendulum_sliding_mode/</code>
-- CSV: <code>output/pendulum_sliding_mode/cartpole_log.csv</code>
-- MP4: <code>output/pendulum_sliding_mode/pendulum_smc_10s_6000f.mp4</code> (if FFmpeg is installed)
-
-### Manual MP4 encoding (if needed)
-
-If FFmpeg is installed but you want to encode manually (or customize quality):
-
-<pre><code>ffmpeg -y -framerate 600 -i output/pendulum_sliding_mode/frames/frame_%06d.png ^
-  -c:v libx264 -preset veryfast -crf 18 -pix_fmt yuv420p ^
-  output/pendulum_sliding_mode/pendulum_smc_10s_6000f.mp4</code></pre>
-
-(Use <code>\</code> line continuations on macOS/Linux.)
+- <code>TargetFramework</code>: <code>net8.0-windows</code>
+- <code>UseWindowsForms</code>: enabled for preview window
+- NuGet references:
+  - <code>ScottPlot</code>
+  - <code>System.Drawing.Common</code>
 
 ---
 
@@ -607,88 +584,84 @@ If FFmpeg is installed but you want to encode manually (or customize quality):
 
 ### Windows (Visual Studio 2022) — full setup from a blank solution
 
-This section matches the intended “one solution, two projects” structure.
+This matches the “one solution, two projects” structure.
 
 #### 1) Install prerequisites
 
 - Visual Studio 2022
-  - Workload: <strong>“.NET desktop development”</strong>
+  - Workload: <strong>.NET desktop development</strong>
 - .NET SDK 8 (if not already included)
 - Optional: FFmpeg
 
 #### 2) Create a blank solution
 
-1. <strong>File → New → Project</strong>  
-2. Choose <strong>“Blank Solution”</strong>  
-3. Name: <strong>ODE_PDE_Csharp</strong>  
-4. Location: your desired folder  
+1. <strong>File → New → Project</strong>
+2. Select: <strong>Blank Solution</strong>
+3. Name: <strong>ODE_PDE_Csharp</strong>
+4. Location: choose your repo folder
 5. Create
 
-#### 3) Add the Heat2D project
+#### 3) Add the first project: Heat2D
 
-1. Right-click the solution → <strong>Add → New Project</strong>  
-2. Choose <strong>Console App</strong> (C#)  
-3. Name: <strong>Heat2D</strong>  
-4. Framework: <strong>.NET 8</strong>  
-5. Create  
-6. Replace the generated <code>Program.cs</code> with <code>ODE_PDE_Csharp/Heat2D/Program.cs</code> content in this repository.
-7. Right-click <strong>Heat2D</strong> → <strong>Manage NuGet Packages</strong>:
-   - Install: <strong>ScottPlot</strong> (5.*)
-   - Install: <strong>System.Drawing.Common</strong> (8.0.0)
-8. Ensure the project file matches <code>Heat2D.csproj</code> (TargetFramework and UseWindowsForms).
+1. Right-click the solution → <strong>Add → New Project</strong>
+2. Choose: <strong>Console App</strong> (C#)
+3. Project name: <strong>Heat2D</strong>
+4. Target framework: <strong>.NET 8</strong>
+5. Create
+6. Replace <code>Program.cs</code> with <code>ODE_PDE_Csharp/Heat2D/Program.cs</code> from this repo.
+7. Add NuGet packages:
+   - Right-click <strong>Heat2D</strong> → <strong>Manage NuGet Packages…</strong>
+   - Install:
+     - <code>ScottPlot</code>
+     - <code>System.Drawing.Common</code>
 
-#### 4) Add the PendulumSlidingMode project
+#### 4) Add the second project: PendulumSlidingMode
 
-1. Right-click the solution → <strong>Add → New Project</strong>  
-2. Choose <strong>Console App</strong> (C#)  
-3. Name: <strong>PendulumSlidingMode</strong>  
-4. Framework: <strong>.NET 8</strong>  
-5. Create  
-6. Replace the generated <code>Program.cs</code> with <code>ODE_PDE_Csharp/PendulumSlidingMode/Program.cs</code> content in this repository.
-7. Right-click <strong>PendulumSlidingMode</strong> → <strong>Manage NuGet Packages</strong>:
-   - Install: <strong>ScottPlot</strong> (5.*)
-   - Install: <strong>System.Drawing.Common</strong> (8.0.0)
-8. Ensure the project file matches <code>PendulumSlidingMode.csproj</code>.
+Repeat the same steps:
 
-#### 5) Set the output folder to the repository root (recommended)
+- Add a new Console App named <strong>PendulumSlidingMode</strong>
+- Replace <code>Program.cs</code> with <code>ODE_PDE_Csharp/PendulumSlidingMode/Program.cs</code>
+- Install the same NuGet packages for this project:
+  - <code>ScottPlot</code>
+  - <code>System.Drawing.Common</code>
 
-If you want the <code>output/</code> folder to appear at the repo root (not under <code>bin/Debug</code>):
+#### 5) Ensure the output folder appears where you expect
 
-1. Right-click a project (Heat2D or PendulumSlidingMode) → <strong>Properties</strong>  
-2. Go to <strong>Debug</strong>  
+Both programs write to a relative folder:
+
+- <code>output/...</code>
+
+That path is resolved relative to the process <strong>working directory</strong>.
+For Visual Studio, set the working directory for each project to the solution folder:
+
+1. Right-click project → <strong>Properties</strong>
+2. Go to: <strong>Debug</strong>
 3. Set <strong>Working directory</strong> to:
-   <code>$(SolutionDir)</code>
 
-Repeat for both projects.
+- <code>$(SolutionDir)</code>
 
-#### 6) Install FFmpeg (optional)
+Now <code>output/</code> will be created next to the solution file.
 
-You can install FFmpeg via winget:
+#### 6) Run
 
-<pre><code>winget install --id Gyan.FFmpeg</code></pre>
-
-Then open a new terminal and verify:
-
-<pre><code>ffmpeg -version</code></pre>
-
-Run <code>PendulumSlidingMode</code> again; MP4 encoding should occur automatically.
+- Right-click project → <strong>Set as Startup Project</strong>
+- Press <strong>F5</strong> or <strong>Ctrl+F5</strong>
+- Outputs appear under <code>output/...</code>
 
 ---
 
 ### macOS / Linux
 
-#### Current repository configuration (important)
+#### Important note about the current repository configuration
 
-Both projects target <code>net8.0-windows</code> and rely on <code>System.Drawing</code> for frame rendering and DPI metadata operations. On non-Windows platforms, <code>System.Drawing.Common</code> is not supported as a general-purpose graphics API in modern .NET and may not work reliably.
+The current projects target <code>net8.0-windows</code> and use WinForms/System.Drawing APIs.
+This is a Windows-first configuration, and it is the most reliable way to reproduce the same rendering pipeline.
 
 You have two practical options:
 
-1) <strong>Run on Windows</strong> (recommended for the repository in its current form), or  
-2) <strong>Port the rendering layer</strong> to a cross-platform backend (recommended if you need native macOS/Linux execution).
+#### Option A: Run on Windows
 
-#### Option A: Run via Windows environment
-
-- Use a Windows machine, a Windows VM, or a CI runner that supports Windows.
+- Use a Windows machine, a Windows VM, or a Windows CI runner.
 - Run with Visual Studio or the <code>dotnet</code> CLI.
 
 #### Option B: Port to cross-platform rendering (high-level plan)
@@ -700,23 +673,29 @@ To run natively on macOS/Linux, the typical engineering approach is:
 - remove <code>System.Drawing.Common</code>,
 - render frames using a cross-platform library (for example):
   - <a href="https://github.com/mono/SkiaSharp" target="_blank">SkiaSharp</a>, or
-  - <a href="https://github.com/SixLabors/ImageSharp" target="_blank">SixLabors.ImageSharp</a>.
-- keep ScottPlot for plots (ScottPlot v5 is cross-platform), and save images directly to PNG.
+  - <a href="https://github.com/SixLabors/ImageSharp" target="_blank">SixLabors.ImageSharp</a>,
+- keep ScottPlot for plots (ScottPlot v5 is cross-platform).
 
 Once ported, you can build and run with:
 
-<pre><code>dotnet build -c Release
+```bash
+dotnet build -c Release
 dotnet run --project ODE_PDE_Csharp/Heat2D -c Release
-dotnet run --project ODE_PDE_Csharp/PendulumSlidingMode -c Release</code></pre>
+dotnet run --project ODE_PDE_Csharp/PendulumSlidingMode -c Release
+```
 
 FFmpeg installation (macOS via Homebrew):
 
-<pre><code>brew install ffmpeg</code></pre>
+```bash
+brew install ffmpeg
+```
 
 FFmpeg installation (Ubuntu/Debian):
 
-<pre><code>sudo apt-get update
-sudo apt-get install -y ffmpeg</code></pre>
+```bash
+sudo apt-get update
+sudo apt-get install -y ffmpeg
+```
 
 ---
 
@@ -726,32 +705,42 @@ sudo apt-get install -y ffmpeg</code></pre>
 
 ### I cannot find the <code>output/</code> folder
 
-The output is created relative to the program’s <strong>working directory</strong>. In Visual Studio, the default is often:
+This is almost always a working-directory issue.
 
-<code>.../bin/Debug/net8.0-windows/</code>
+- Visual Studio runs your program with a working directory that may be:
+  - the project folder, or
+  - <code>bin/Debug/net8.0-windows/</code>, depending on settings.
 
-Fix: set <strong>Project Properties → Debug → Working directory = $(SolutionDir)</strong>.
+Fix (recommended):
 
-### MP4 encoding is slow or appears “stuck”
+- Project Properties → Debug → <strong>Working directory</strong> = <code>$(SolutionDir)</code>
 
-- Encoding 6000 PNG frames is CPU-intensive, and disk IO can dominate runtime.
-- Ensure you are running in <strong>Release</strong> mode.
-- Ensure FFmpeg is installed and accessible:
-  <pre><code>ffmpeg -version</code></pre>
-- The repository’s FFmpeg invocation avoids pipe stalls by not redirecting progress output; you should see ongoing FFmpeg progress lines.
+Then run again.
 
-### MP4 not created
+### My MP4 was not created
 
-- FFmpeg is optional. If it is not installed, the program still saves PNG frames.
-- Encode manually (see “Manual MP4 encoding” section).
+- Confirm FFmpeg is installed and accessible:
 
-### Plot images look cropped or labels appear missing
+```bash
+ffmpeg -version
+```
 
-This repository exports plots at high pixel resolutions and then rewrites PNG DPI metadata by cloning pixel data 1:1 (no scaling). If you still see issues:
+- If it is installed but the program still does not produce an MP4, encode manually:
 
-- verify you are viewing the PNG at “actual size” (some viewers auto-scale),
-- try opening the PNG in a different viewer (some applications mishandle DPI metadata),
-- increase plot image dimensions (e.g., 3200×2000) for extreme cases.
+```bash
+ffmpeg -y -framerate 600 -i output/pendulum_sliding_mode/frames/frame_%06d.png \
+  -c:v libx264 -pix_fmt yuv420p -crf 18 -preset veryfast \
+  output/pendulum_sliding_mode/pendulum_smc_10s_6000f.mp4
+```
+
+### Frame generation is slow
+
+Saving 6000 PNG images is disk-I/O heavy.
+
+- Use an SSD (recommended).
+- Run in <strong>Release</strong>.
+- Close the preview window when not needed.
+- If you are experimenting, reduce <code>totalFrames</code> temporarily.
 
 ---
 
@@ -759,12 +748,12 @@ This repository exports plots at high pixel resolutions and then rewrites PNG DP
 
 ## Implementation tutorial video
 
-When the repository is running end-to-end, you can watch the full implementation and walkthrough on YouTube.
+At the end of the workflow, you can watch the full implementation and walkthrough on YouTube.
 
-<!-- Replace YOUR_VIDEO_ID with your uploaded tutorial video ID. -->
-<a href="https://www.youtube.com/watch?v=YOUR_VIDEO_ID" target="_blank">
+<!-- Replace the link below with your final uploaded video URL -->
+<a href="https://www.youtube.com/watch?v=K-gh_15FszQ" target="_blank">
   <img
-    src="https://i.ytimg.com/vi/YOUR_VIDEO_ID/maxresdefault.jpg"
+    src="https://i.ytimg.com/vi/K-gh_15FszQ/maxresdefault.jpg"
     alt="ODE/PDE in C# - Implementation Tutorial"
     style="max-width: 100%; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.18); margin-top: 0.5rem;"
   />
