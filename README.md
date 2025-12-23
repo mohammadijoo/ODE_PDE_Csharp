@@ -751,9 +751,9 @@ Saving 6000 PNG images is disk-I/O heavy.
 At the end of the workflow, you can watch the full implementation and walkthrough on YouTube.
 
 <!-- Replace the link below with your final uploaded video URL -->
-<a href="My_Video" target="_blank">
+<a href="https://www.youtube.com/watch?v=N5TD0oICQDw" target="_blank">
   <img
-    src="https://i.ytimg.com/vi/My_Video/maxresdefault.jpg"
+    src="https://i.ytimg.com/vi/N5TD0oICQDw/maxresdefault.jpg"
     alt="ODE/PDE in C# - Implementation Tutorial"
     style="max-width: 100%; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.18); margin-top: 0.5rem;"
   />
