@@ -328,10 +328,10 @@ Because the plant is nonlinear, the program does not rely on a closed-form affin
 Instead, it uses a practical numerical linearization around the current state:
 
 1. Define the desired sliding surface derivative:  
-   $ \dot{s}_{des} = -k\,\mathrm{sat}\left(\frac{s}{\phi}\right) $.
+   $\dot{s}_{des} = -k\,\mathrm{sat}\left(\frac{s}{\phi}\right)$.
 2. Approximate $\dot{s}(u)$ locally as $\dot{s}(u) \approx a u + b$ by evaluating $\dot{s}$ at two nearby inputs.
 3. Solve:
-   $ u_{smc} = \frac{\dot{s}_{des} - b}{a} $.
+   $u_{smc} = \frac{\dot{s}_{des} - b}{a}$.
 4. Add a gated cart-centering term and clamp to actuator limits.
 
 ### 5) Gated cart-centering term
@@ -751,9 +751,9 @@ Saving 6000 PNG images is disk-I/O heavy.
 At the end of the workflow, you can watch the full implementation and walkthrough on YouTube.
 
 <!-- Replace the link below with your final uploaded video URL -->
-<a href="https://www.youtube.com/watch?v=K-gh_15FszQ" target="_blank">
+<a href="My_Video" target="_blank">
   <img
-    src="https://i.ytimg.com/vi/K-gh_15FszQ/maxresdefault.jpg"
+    src="https://i.ytimg.com/vi/My_Video/maxresdefault.jpg"
     alt="ODE/PDE in C# - Implementation Tutorial"
     style="max-width: 100%; border-radius: 10px; box-shadow: 0 6px 18px rgba(0,0,0,0.18); margin-top: 0.5rem;"
   />
